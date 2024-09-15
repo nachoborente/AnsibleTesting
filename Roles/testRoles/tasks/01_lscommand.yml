@@ -1,0 +1,16 @@
+---
+- name: ls 
+  ansible.builtin.shell: ls
+  args:
+    chdir: "/mnt/c/temp/delete"
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: ls with vars
+  ansible.builtin.shell: ls
+  args:
+    chdir: "{{ remote_dir }}"
+  register: out
+
+- debug: var=out.stdout_lines

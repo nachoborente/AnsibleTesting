@@ -1,0 +1,96 @@
+---
+- name: Preparando subida - SPA FBP
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - block:
+    - file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ lookup('env','WORKSPACE') }}/source-fbp"
+    - debug:
+        msg: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+    - command: "tar xzvf {{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }} -C {{ lookup('env','WORKSPACE') }}/source-fbp"
+    run_once: yes
+    delegate_to: localhost
+
+- name: Desplegando nueva version de SPA Front Banca Privada - DEV
+  hosts: localhost
+  gather_facts: no
+  serial: 1
+  tasks:
+  - include_tasks: copy_static_code.yml
+    vars:
+      source: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+      destination: "{{ remote_dir }}" 
+      archive: true
+      exclude:
+        - index.html
+        - entrypoints.json
+        - entrypoints-mfe.json
+
+- name: Check si entrypoints.json existe
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Check si entrypoints.json existe
+      stat:
+        path: "{{ lookup('env','WORKSPACE') }}/source-fbp/entrypoints.json"
+      register: entrypoints_exits
+    - debug:
+        msg: "entrypoints.json found"
+      when: entrypoints_exits.stat.exists
+
+- name: Desplegando index.html para SPA Front Banca Privada - DEV
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - copy:
+      src: "{{ lookup('env','WORKSPACE') }}/source-fbp/index.html"
+      dest: "{{ remote_dir }}"
+
+- name: Desplegando entrypoints.json para Banca Privada nbd - DEV
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - copy:
+      src: "{{ lookup('env','WORKSPACE') }}/source-fbp/entrypoints.json"
+      dest: "{{ remote_dir }}"
+    when: entrypoints_exits.stat.exists
+
+- name: Limpiando versiones antiguas
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: Buscando versiones antiguas nbd
+    find:
+      paths: "{{ remote_dir }}"
+      file_type: directory
+      age: 1d
+      patterns: "^ver.nbd.[0-9][0-9]+[0-9]$"
+      use_regex: yes
+    register: filesOlderThan
+  - debug:
+      msg: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+  - name: Eliminando versiones antiguas
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    loop: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+  - name: Buscando versiones antiguas
+    find:
+      paths: "{{ remote_dir }}"
+      file_type: directory
+      age: 1d
+      patterns: "^ver.[0-9][0-9]+[0-9]$"
+      use_regex: yes
+    register: filesOlderThan
+  - debug:
+      msg: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+  - name: Eliminando versiones antiguas
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    loop: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+```

@@ -1,0 +1,3 @@
+---
+# tasks file for front undeploy
+- include_tasks: 01_lscommand.yml

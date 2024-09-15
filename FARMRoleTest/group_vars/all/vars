@@ -1,0 +1,13 @@
+---
+# Global config
+appName: "{{ lookup('env','repo') }}"
+serverPortHttp: "80"
+keystore_content: "{{ vault_keystore_content }}"
+keystore_password: "{{ vault_keystore_password }}"
+trustore_password: "changeit"
+entorno: "{{ lookup('env','ENTORNO') | default('dev', True)}}"
+http:    
+    httpServerPath: /usr/IBM/HTTPServer9
+    httpUser: web
+    httpGroup: staff
+    keyfile: /usr/IBM/HTTPServer9/conf/{{ appName }}.kdb

@@ -1,0 +1,13 @@
+#!/usr/bin/ksh
+# Configures the Automatic Startup of the IBM HTTP Server
+# This file should be ownd by root:system and have permissions 0774
+ 
+BINPATH=/usr/IBM/HTTPServer9/bin
+ 
+if [[ `/bin/id -u` != 0 ]];then
+        echo "Error: you must be root to execute this command" >&2
+        exit 1
+fi
+ 
+echo "Starting IBM HTTP Server..."
+$BINPATH/apachectl.{{ appName }}_{{ publicHttpsPort }} start

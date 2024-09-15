@@ -1,0 +1,12 @@
+---
+- name: Desplegando nueva version de Banca Privada MicroFrontEnd - DEV
+  hosts: bpmf
+  gather_facts: no
+  serial: 1
+  tasks:
+  - include_tasks: copywithexclude.yml
+    vars:
+      source: "/mnt/c/temp/delete/TestCopy/web"
+      destination: "{{ remote_dir }}" 
+      archive: true
+

@@ -1,0 +1,48 @@
+---
+- block:
+  - name: "Sacando nodo {{ ansible_default_ipv4['address'] }} del balanceador {{ provider.server }}"
+    bigip_pool_member:
+      provider: "{{ provider }}"
+      host: "{{ hostvars[inventory_hostname]['ip_vhost'] }}"
+      name: "{{ hostvars[inventory_hostname]['f5_member_name'] }}"
+      pool: "{{ pool }}"
+      partition: "{{ partition }}"
+      port: "{{ port }}"
+      state: forced_offline
+    delegate_to: localhost
+  when: action == "remove"
+
+- block:
+  - name: "Metiendo nodo {{ ansible_default_ipv4['address'] }} al balanceador {{ provider.server }}"
+    bigip_pool_member:
+      provider: "{{ provider }}"
+      host: "{{ hostvars[inventory_hostname]['ip_vhost'] }}"
+      name: "{{ hostvars[inventory_hostname]['f5_member_name'] }}"
+      pool: "{{ pool }}"
+      partition: "{{ partition }}"
+      port: "{{ port }}"
+      state: enabled
+    delegate_to: localhost
+  when: action == "enter"
+
+- block:
+  - name: "Probando {{ ansible_default_ipv4['address'] }} con {{ provider.server }}"
+    bigip_device_info:
+      provider: "{{ provider }}"
+      gather_subset:
+        - ltm-pools
+    delegate_to: localhost
+  when: action == "test"
+
+- block:
+  - name: "debug vars"
+    debug:
+      msg:
+        - "prov: {{ provider }}"
+        - "host: {{ hostvars[inventory_hostname]['ip_vhost'] }}"
+        - "name: {{ hostvars[inventory_hostname]['f5_member_name'] }}"
+        - "pool: {{ pool }}"
+        - "partition: {{ partition }}"
+        - "port: {{ port }}"
+    delegate_to: localhost
+  when: action == "debug"

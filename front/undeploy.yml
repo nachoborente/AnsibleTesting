@@ -1,0 +1,18 @@
+---
+- hosts: "{{ lookup('env','ENTORNO') }}"
+  gather_facts: no
+  vars:
+    usuario: "{{ lookup('env','USERNAME') }}"
+    entorno: "{{ lookup('env','ENTORNO') }}"
+- hosts: "localhost"
+  gather_facts: no
+  vars:
+    usuario: "testuser01"
+    entorno: "dev"
+    clavePublica: "test"
+  tasks:  
+    - name: Remove user
+      ansible.builtin.user:
+        name: "{{ usuario }}"
+        state: absent
+        remove: yes

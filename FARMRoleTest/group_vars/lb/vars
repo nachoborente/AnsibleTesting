@@ -1,0 +1,6 @@
+---
+port: 443
+user: userlb
+password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      asascdsfafdffa

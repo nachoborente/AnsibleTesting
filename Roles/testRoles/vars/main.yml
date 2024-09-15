@@ -1,0 +1,3 @@
+---
+# vars file for role
+technology: "{{ lookup('env','repoTech') }}#{{ lookup('env','repoType') }}"

@@ -1,0 +1,24 @@
+  - name: "Checking private endpoint"
+    uri:
+      url: "https://{{ ip_vhost }}:{{ publicHttpsPort }}"
+      return_content: yes
+      validate_certs: no
+      status_code: 200, 401, 403
+    retries: 10 
+    delay: 6
+    register: result_private
+    until: result_private is not failed
+  - name: Checking urls
+    uri:
+      url: "https://{{ publicEndpoint }}:{{ publicHttpsPort }}"
+      return_content: yes
+      status_code: 200, 401, 403
+      validate_certs: no
+      use_proxy: no
+    retries: 10 
+    delay: 10
+    register: result_public
+    until: result_public is not failed
+    delegate_to: localhost
+    run_once: true
+

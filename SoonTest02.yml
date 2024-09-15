@@ -1,0 +1,77 @@
+---
+- hosts: all
+  serial: 1
+  tasks:
+  - block:  
+    - name: Preparando subida - Soon
+      file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ lookup('env','WORKSPACE') }}/source-soon"
+    - debug:
+        msg: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+    - command: "cp {{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}/ {{ lookup('env','WORKSPACE') }}/source-soon -r"
+    run_once: yes
+    delegate_to: localhost
+- name: Desplegando nueva version SOON - {{ appName }}
+  hosts: localhost
+  tasks:
+  - include_tasks: copy_static_code.yml
+    vars:
+      source: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+      destination: "{{ remote_dir }}" 
+      archive: true
+      exclude:
+        - index.html
+        - entrypoints.json
+- name: Check si entrypoints.json existe
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Check si entrypoints.json existe
+      stat:
+        path: "{{ lookup('env','WORKSPACE') }}/source-soon/entrypoints.json"
+      register: entrypoints_exists
+      delegate_to: localhost
+    - debug:
+        msg: "entrypoints.json found"
+      when: entrypoints_exists.stat.exists
+- name: Desplegando index.html para SOON - {{ appName }}
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - copy:
+      src: "{{ lookup('env','WORKSPACE') }}/source-soon/index.html"
+      dest: "{{ remote_dir }}"
+- name: Desplegando entrypoints.json para SOON - {{ appName }}
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - copy:
+      src: "{{ lookup('env','WORKSPACE') }}/source-soon/entrypoints.json"
+      dest: "{{ remote_dir }}"
+    when: entrypoints_exists.stat.exists
+- name: Limpiando versiones antiguas
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Buscando versiones antiguas SOON - {{ appName }}
+    find:
+      paths: "{{ remote_dir }}"
+      file_type: directory
+      age: 1d
+      patterns: "^ver.[0-9][0-9]+[0-9]$"
+      use_regex: yes
+    register: filesOlderThan
+  - debug:
+      msg: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+  - name: Eliminando versiones antiguas
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    loop: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+  - name: Configurando certificados
+    include_tasks: keydb.yml
+  - name: Configurando HTTPServer
+    include_tasks: httpServer.yml

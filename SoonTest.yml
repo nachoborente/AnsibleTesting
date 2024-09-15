@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  serial: 1
+  tasks:
+  - block:  
+    - name: Preparando subida - Soon
+      file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ lookup('env','WORKSPACE') }}/source-soon"
+    - debug:
+        msg: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+    - command: "tar xzvf {{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }} -C {{ lookup('env','WORKSPACE') }}/source-soon"
+    run_once: yes
+    delegate_to: localhost
+  - name: Desplegando nueva version SOON - {{ appName }}
+    include_tasks: copy_static_code.yml
+    vars:
+      source: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+      destination: "{{ remote_dir }}" 
+      archive: true
+      exclude:
+        - index.html
+        - entrypoints.json
+  
+  
+  - name: Check si entrypoints.json existe2
+    gather_facts: no
+    tasks:
+      - name: Check si entrypoints.json existe
+        stat:
+          path: "{{ lookup('env','WORKSPACE') }}/source-soon/entrypoints.json"
+        register: entrypoints_exists
+        delegate_to: localhost
+      - debug:
+          msg: "entrypoints.json found"
+        when: entrypoints_exists.stat.exists
+
+  - name: Desplegando index.html para SPA Front Banca Privada - DEV
+    gather_facts: no
+    tasks:
+    - copy:
+        src: "{{ lookup('env','WORKSPACE') }}/source-soon/index.html"
+        dest: "{{ remote_dir }}"

@@ -1,0 +1,41 @@
+---
+#### el entrypoint.json  no es neceario para las aplicaciones web
+  - name: Check si entrypoints.json existe
+    block:
+      - name: Check si entrypoints.json existe
+        stat:
+          path: "{{ lookup('env','WORKSPACE') }}/source-code/entrypoints.json"
+        register: entrypoints_exists
+        delegate_to: localhost
+      - debug:
+          msg: "entrypoints.json found"
+        when: entrypoints_exists.stat.exists
+  - name: Desplegando index.html para {{ appName }}    
+    copy:
+      src: "{{ lookup('env','WORKSPACE') }}/source-code/index.html"
+      dest: "{{ remote_dir }}"
+  - name: Desplegando entrypoints.json para {{ appName }}
+    copy:
+        src: "{{ lookup('env','WORKSPACE') }}/source-code/entrypoints.json"
+        dest: "{{ remote_dir }}"
+    when: entrypoints_exists.stat.exists
+#########        
+  - name: Limpiando versiones antiguas    
+    block:
+    - name: Buscando versiones antiguas  {{ appName }}
+      find:
+        paths: "{{ remote_dir }}"
+        file_type: directory
+        age: 1d
+        patterns: "^ver.[0-9][0-9]+[0-9]$"
+        use_regex: yes
+      register: filesOlderThan
+    - debug:
+        msg: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+    - name: Eliminando versiones antiguas
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ (filesOlderThan.files | sort(attribute='ctime'))[:-1] | list }}"
+###########
+

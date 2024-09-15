@@ -1,0 +1,46 @@
+---
+- set_fact:
+    timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+    carpeta: "/mnt/c/temp/delete/TestCopy/bk"
+- block:
+  - name: Crear carpetas- excluyendo mfe_integration
+    ansible.builtin.shell: find ./* -type d -not -path "./mfe-integration*"
+    args:
+      chdir: "{{ destination }}"
+    register: listfolders
+  - debug: var=listfolders.stdout_lines
+  - name: Copiar ficheros
+    ansible.builtin.shell: find ./* -type f -not -path "./mfe-integration*"
+    args:
+      chdir: "{{ destination }}"
+    register: listfiles
+  - debug: var=listfiles.stdout_lines
+  - name: Loop over listfolders and create directories
+    ansible.builtin.shell: mkdir -p "{{ carpeta }}/{{ item }}"
+    loop: "{{ listfolders.stdout_lines }}"
+    register: create_dirs
+  - debug: var=create_dirs.stdout_lines
+  - name: Loop over listfiles and copy files
+    ansible.builtin.shell: cp "{{ item }}" "{{ carpeta }}/{{ item }}"
+    args:
+      chdir: "{{ destination }}"
+    loop: "{{ listfiles.stdout_lines }}"
+    register: copy_files
+  - debug: var=copy_files.stdout_lines
+
+
+  # - name: Crear carpetas- excluyendo mfe_integration
+  #   ansible.builtin.shell: find ./* -type d -not -path "./mfe-integration*" -exec sh -c 'mkdir "{{ carpeta }}{}"' \;
+  #   args:
+  #     chdir: "{{ destination }}"
+  #   register: out
+  # - debug: var=out.stdout_lines
+  # - name: Copiar ficheros
+  #   ansible.builtin.shell: find ./* -type f -not -path "./mfe-integration*" -exec sh -c 'cp "{}" "{{ carpeta }}{}"' \;
+  #   args:
+  #     chdir: "{{ destination }}"
+  #   register: out
+  # - debug: var=out.stdout_lines
+
+    
+    

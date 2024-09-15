@@ -1,0 +1,14 @@
+---
+- name: Set Environment
+  hosts: localhost
+  
+- name: test shell command
+  hosts: localhost
+  tasks:
+    - name: ls 
+      ansible.builtin.shell: ls
+      args:
+        chdir: "/mnt/c/temp/delete"
+      register: out
+
+    - debug: var=out.stdout_lines

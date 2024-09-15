@@ -1,0 +1,69 @@
+---
+- name: Set Environment
+  hosts: localhost
+  vars:
+    WORKSPACE: "/mnt/c/temp/delete/Ansible/Test01"
+
+# - name: test shell command
+#   hosts: localhost
+  tasks:
+#     - name: ls -Ra command
+#       ansible.builtin.shell: ls -Ra
+#       register: out
+#     - debug: var=out.stdout_lines
+  - name: find list of files
+    find:
+      paths: "{{ WORKSPACE }}"
+      file_type: file
+    register: filelist
+  - debug: var=filelist
+  - name: Limpiando temporales
+    file:
+      path: "{{ item.path }}"
+      state: absent    
+    loop: "{{ filelist.files }}"
+
+  - name: find list of folders
+    find:
+      paths: "{{ WORKSPACE }}"
+      file_type: directory
+    register: folders
+  - debug: var=folders
+  - name: Limpiando temporales
+    file:
+      path: "{{ item.path }}"
+      state: absent    
+    loop: "{{ folders.files }}"
+      #recurse: yes
+# - name: Check si nacho.txt existe
+#   hosts: localhost 
+#   gather_facts: no
+#   tasks:
+#     - name: Check si nacho.txt existe
+#       stat:
+#         path: "/mnt/c/temp/delete/nacho.txt"
+#       register: nacho_txt_exits
+#     - debug:
+#         msg: "nacho.txt found"
+#       when: nacho_txt_exits.stat.exists
+#     - debug:
+#         msg: "no found"
+#       when: not nacho_txt_exits.stat.exists
+
+# - name: Check si nacho.txt existe using env WORKSPACE and delegate_to
+#   hosts: localhost 
+#   gather_facts: no
+#   tasks:
+#     - name: Check si nacho.txt existe
+#       stat:
+#         path: "{{ lookup('env','WORKSPACE') }}/delete/nacho.txt"
+#       register: wp_nacho_txt_exits
+#       delegate_to: localhost
+#     - debug:
+#         msg: "{{ lookup('env','WORKSPACE') }}/delete/nacho.txt found"
+#       when: wp_nacho_txt_exits.stat.exists
+#       delegate_to: localhost
+#     - debug:
+#         msg: "{{ lookup('env','WORKSPACE') }}/delete/nacho.txt no found"
+#       when: not wp_nacho_txt_exits.stat.exists
+#       delegate_to: localhost

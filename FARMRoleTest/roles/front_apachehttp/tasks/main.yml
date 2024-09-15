@@ -1,0 +1,35 @@
+  ---
+# tasks file for front_apachehttp
+
+#- name: Removing server from LB
+# to be done in playbook
+  
+#To do: preparing installation (untar artifact)
+
+- include: copy_static_code.yml 
+
+#
+#To do:
+- name: Configurando certificados
+  include: keydb.yml
+
+- name: Configurando HTTPServer
+  include: httpServer.yml
+
+#posttasks:
+- name: Activate load balancer
+  include: install.yml
+  when: has_balancer
+- name: Check Endpoints
+  include: checkhttp.yml
+  
+
+#- name: Ensure Filebeat is started and enabled at boot.
+#  service:
+#    name: filebeat
+#    state: started
+#    enabled: true
+#  become: true
+
+- name: Flush handlers
+  meta: flush_handlers

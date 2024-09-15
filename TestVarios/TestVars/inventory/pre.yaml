@@ -1,0 +1,32 @@
+bpmf:
+  hosts:
+    server1: 
+      ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+    server2: 
+      ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+  vars: 
+    artifact_name: front-package
+    artifact: front-package.tgz
+    local_rsync_dir: /tmp/bpmf
+    remote_dir: /mnt/c/temp/delete/Ansible/prehost/home/spauser/spaweb/
+    upload_sourcemaps: false
+banca_telefonica:
+  hosts:
+    server_bt1: 
+       ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+    server_bt2: 
+       ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+  vars: 
+    artifact_name: banca-telefonica
+    artifact: banca-telefonica.tgz
+    local_rsync_dir: /tmp/bt
+    remote_dir: /mnt/c/temp/delete/Ansible/prehost/home/spaint/spaweb/
+    upload_sourcemaps: false

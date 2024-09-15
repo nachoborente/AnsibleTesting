@@ -1,0 +1,7 @@
+---
+all:
+  hosts:
+  vars:
+      workspace: "/mnt/c/temp/delete/ansibleTest"
+      remote_dir: "/mnt/c/temp/delete/ansibleTest/SOONTEST/"
+      artifact: "Web"

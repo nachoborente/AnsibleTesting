@@ -1,0 +1,48 @@
+---
+- set_fact:
+    timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+- set_fact:
+    carpeta: "/tmp/source-{{ timestamp }}"
+- name: Creando carpeta temporal
+  file:
+    state: directory
+    path: "{{ item }}"
+  loop:
+    - "{{ carpeta }}"
+  delegate_to: localhost
+- block:
+  - name: Descomprimiendo artefacto
+    command: "tar xzvf {{ artefacto }} -C {{ carpeta }}"
+    when: archive is defined and (archive|bool)
+  - name: Buscando rutas de sourcemaps 
+    find:
+      paths: "{{ carpeta }}"
+      file_type: file
+      recurse: yes
+      patterns: "*.{{ sourcemaps_ext }}"
+    register: sourcemaps_files
+  - name: Ficheros a subir
+    debug:
+      msg: 
+        - "filename: {{ item.path | basename }}"
+        - "chunk_filename: {{ item.path | replace('{{ sourcemaps_ext }}','js') }}"
+        - "bundle_filepath: {{ app_base_url }}/{{ '/'.join(item.path.split('/')[3:]).replace('{{ sourcemaps_ext }}','js') }}"
+        - "service_name: {{ apm_service_name }}"
+        - "apm_server_url: {{ apm_server_url }}"
+        - "service_version: '{{ apm_srv_version }}'"
+    loop: "{{ sourcemaps_files.files }}"
+    delegate_to: localhost
+  
+  # #-F 'bundle_filepath={{ app_base_url }}/{{ '/'.join(item.path.split('/')[3:]).replace('js.uni.map','js') }}'
+  # - name: Subiendo sourcemaps
+  #   command: >
+  #     curl -X POST "{{ apm_server_url }}"
+  #     -H 'Content-Type: multipart/form-data'
+  #     -H 'kbn-xsrf: true'
+  #     -H 'Authorization: ApiKey {{ apm_apikey }}'
+  #     -F 'service_name={{ apm_service_name }}'
+  #     -F 'service_version="{{ apm_srv_version }}"'
+  #     -F 'bundle_filepath={{ app_base_url }}/{{ '/'.join(item.path.split('/')[3:]).replace('js.uni.map','js') }}'
+  #     -F 'sourcemap=@{{item.path}}'
+  #   loop: "{{ sourcemaps_files.files }}"
+  delegate_to: localhost

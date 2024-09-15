@@ -1,0 +1,21 @@
+---
+- name: Leer y procesar archivo JSON
+  hosts: localhost
+  tasks:
+    - name: Leer contenido del archivo JSON
+      slurp:
+        src: "{{ lookup('env','WORKSPACE') }}/listMaps.json"
+      register: json_content
+
+    - name: Decodificar contenido JSON
+      set_fact:
+        decoded_json: "{{ json_content.content | b64decode | from_json }}"
+
+    - name: Almacenar valores en un array
+      set_fact:
+        mi_array: "{{ decoded_json.artifacts | map(attribute='id') | list }}"
+
+    - name: Recorrer el array
+      debug:
+        var: item
+      with_items: "{{ mi_array }}"

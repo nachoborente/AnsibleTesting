@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  vars:
+    carpeta: "/mnt/c/temp/delete/httpd01/web01_448"
+  tasks:
+  - name: Borrando carpeta temporal
+    file:
+      state: absent
+      path: "{{ item }}"
+    loop:
+      - "{{ carpeta }}"
+    delegate_to: localhost
+
+  - name: Borrando carpeta temporal
+    file:
+      state: absent
+      path: "{{ item }}"
+    loop:
+      -  "/mnt/c/temp/delete/httpd01/https.conf"
+    delegate_to: localhost
+
+

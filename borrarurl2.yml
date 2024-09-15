@@ -1,0 +1,52 @@
+---
+- hosts: appserver
+  serial: 1
+  gather_facts: no
+  become: true
+  tasks:
+  # - name: Managing IHS folder
+  #   file:
+  #     path: "{{ item }}"
+  #     state: directory
+  #     mode: '0777'
+  #     owner: "{{ http.httpUser }}"
+  #     group: "{{ http.httpGroup }}"
+  #   loop:
+  #     - "/var/httpd/{{ appName }}_{{ serverPortHttps }}"
+  #     - "/var/httpd/{{ appName }}_{{ serverPortHttps }}/logs/"
+  - name: Managing IHS folder
+    file:
+      path: "{{ item }}"
+      state: absent
+    loop:
+        - "/var/httpd/{{ appName }}_{{ serverPortHttps }}"
+        # - "/var/httpd/{{ appName }}_{{ serverPortHttps }}/logs/"
+  - name: "Check that HTTP conf exists"
+    stat:
+      path: "{{ http.httpServerPath }}/conf/httpd.{{ appName }}_{{ serverPortHttps }}.conf"
+    register: httpdResult
+  # - name: Managing HTTPServer config file
+  #   file:
+  #     state: directory
+  #     path: "{{ http.httpServerPath }}/conf/httpd.{{ appName }}_{{ serverPortHttps }}.conf"
+  #     owner: "{{ http.httpUser }}"
+  #     group: "{{ http.httpGroup }}"
+  #     mode: 0777
+  - name: "Check that apachectl file exists"
+    stat:
+      path: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ serverPortHttps }}"
+    register: apachectlResult
+  - name: Stop HTTPServer apachectl file
+    command: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ serverPortHttps }} stop"
+    when: apachectlResult.stat.exists
+      
+  - name: Deleting HTTPServer apachectl file
+    file:
+      path: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ serverPortHttps }}"
+      state: absent
+    when: apachectlResult.stat.exists
+  - name: delete HTTPServer config file
+    file:
+      path: "{{ http.httpServerPath }}/conf/httpd.{{ appName }}_{{ serverPortHttps }}.conf"
+      state: absent
+    when: httpdResult.stat.exists

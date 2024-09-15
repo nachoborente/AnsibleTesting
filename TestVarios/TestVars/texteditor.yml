@@ -1,0 +1,42 @@
+---
+- name: Preparando subida - Banca Privada MicroFrontEnd
+  hosts: bpmf
+  gather_facts: no
+  tasks:
+  - set_fact:
+      sourcemaps_ext: "uni.map"
+  - set_fact:
+      carpeta: "/mnt/c/temp/delete/Ansible/sourcemaps"
+      extensiontoreplace: "js.{{ sourcemaps_ext }}"
+      ruta: "/tmp/source/vermfe/static/js/nacho.js.uni.map"
+  #     authorization: "Authorization: APIKey {{ lookup('vars', apm_apikeypro) | replace('\\n', '') }}"
+  #     Uriauthorization: "APIKey {{ lookup('vars', apm_apikeypro) | replace('\\n', '') }}"
+  # - name: Mostrar la salida almacenada
+  #   debug:
+  #     var: Uriauthorization
+  # - name: Mostrar la salida almacenada
+  #   debug:
+  #     var: authorization
+  - name: Buscando rutas de sourcemaps 
+    find:
+      paths: "{{ carpeta }}"
+      file_type: file
+      recurse: yes
+      patterns: "*.{{ sourcemaps_ext }}"
+    register: sourcemaps_files
+  - name: Create file paths list
+    set_fact:
+      file_paths:
+        - original: "{{ item.path }}"
+          replaced: "{{ item.path.replace('{{ extensiontoreplace }}$', 'js') }}"
+    loop: "{{ sourcemaps_files.files }}"
+  - name: replace Extension
+    debug:
+      msg: "bundle_filepath= nachoweb/{{ ('/'.join(ruta.split('/')[3:])).replace(extensiontoreplace,'js') }}"
+    delegate_to: localhost
+  - name: Subiendo sourcemaps
+    debug:
+      msg: "bundle_filepath= nachoweb/{{ '/'.join(ruta.split('/')[3:]).replace(extensiontoreplace,'js') }}"
+    loop: "{{ sourcemaps_files.files }}"
+    delegate_to: localhost    
+  run_once: yes

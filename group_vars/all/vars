@@ -1,0 +1,11 @@
+---
+# Global config
+appName: "nachoApp"
+serverPortHttp: "80"
+serverPortHttps: "443"
+trustore_password: "changeit"
+http:    
+    httpServerPath: /usr/IBM/HTTPServer9
+    httpUser: web
+    httpGroup: staff
+    keyfile: /usr/IBM/HTTPServer9/conf/{{ appName }}.kdb

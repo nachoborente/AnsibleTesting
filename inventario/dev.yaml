@@ -1,0 +1,11 @@
+---
+appserver:
+  hosts:
+    appserver01:
+      ansible_user: "ansible"
+  vars:
+    remote_dir: "/home/spauser/storybookccc.xxxxxxbanco.es"
+    artifact: "storybook.tgz"
+    artifact_name: "storybook"
+    upload_sourcemaps: false
+    publicEndpoint: nacho.com

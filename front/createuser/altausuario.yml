@@ -1,0 +1,41 @@
+---
+- hosts: "172.17.0.2"
+  gather_facts: no
+  vars:
+    usuario: "testuser01"
+    entorno: "dev"
+    clavePublica: "test"
+  tasks:
+  - name: Creando grupo
+    group:
+      name: "{{ usuario }}"
+      state: present
+  - name: Creando usuario "{{ usuario }}" en entorno {{ entorno }}
+    user:
+      name: "{{ usuario }}"
+      group: "{{ usuario }}"
+      shell: /bin/bash
+      create_home: yes
+      state: present
+  - name: Configurando permisos del home
+    file:
+      state: directory
+      path: "/home/{{ usuario }}"
+      mode: '0750'
+      owner: "{{ usuario }}"
+  - name: Creando directorio inicial
+    file:
+      state: directory
+      path: "/home/{{ usuario }}/{{ item }}"
+      mode: '0755'
+      owner: "{{ usuario }}"
+      group: "{{ usuario }}"
+    with_items:
+      - web
+      - web/static
+      - web/static/dist
+  - name: Configurando servidor
+    file:
+      src: "/home/{{ usuario }}/web"
+      dest: "/webs/test01/{{ usuario }}"
+      state: link

@@ -1,0 +1,30 @@
+---
+- name: executeRole
+  hosts: appserver
+  vars: 
+    technology: "{{ lookup('env','repoTech') }}#{{ lookup('env','repoType') }}"
+  gather_facts: no
+  tasks:
+    - debug:
+        msg: "{{ technology }}"
+    - name: front undeploy
+      ansible.builtin.include_role:
+        name: testRoles
+      when: technology == "NPM#angular" 
+
+- name: executeRole02
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: "get technology"
+      ansible.builtin.shell: "echo $reporTech#$repoType"
+      delegate_to: localhost
+      register: technology
+    - debug:
+        msg: "{{ technology.stdout }}"
+    - name: front undeploy02
+      ansible.builtin.include_role:
+        name: testRoles
+        
+      when: technology.stdout == "NPM#test02" 
+

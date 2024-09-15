@@ -1,0 +1,7 @@
+---
+- hosts: appserver
+  serial: 1
+  gather_facts: no
+  tasks:
+  - name: Configurando HTTPServer
+    include_tasks: delete_httpdServer.yml

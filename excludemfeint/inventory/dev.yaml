@@ -1,0 +1,8 @@
+bpmf:
+  hosts:
+    server1: 
+      ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+  vars:
+    remote_dir: /mnt/c/temp/delete/TestCopy/web

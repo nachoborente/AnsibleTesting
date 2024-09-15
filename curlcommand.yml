@@ -1,0 +1,16 @@
+- name: Subiendo sourcemaps
+#    uri:
+#      url: "{{ apm_server_url }}"
+#      method: POST
+#      headers:
+#        Authorization: "ApiKey {{ apm_apikey }}"
+#      body_format: form-multipart
+#      body:
+#        sourcemap:
+#          content: "{{ lookup('file', item.path) }}"
+#          filename: "{{ item.path | basename }}"
+#          mime_type: text/plain
+#        bundle_filepath: "{{ app_base_url }}/{{ '/'.join(item.path.split('/')[3:]).replace('js.uni.map','js') }}"
+#        service_name: "{{ apm_service_name }}"
+#        service_version:"{{ app_version }}""
+#    loop: "{{ sourcemaps_files.files }}"

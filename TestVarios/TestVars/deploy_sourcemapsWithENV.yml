@@ -1,0 +1,34 @@
+---
+- name: Preparando subida - Banca Privada MicroFrontEnd
+  hosts: bpmf
+  gather_facts: no
+  tasks:
+  - block:
+    - file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ lookup('env','WORKSPACE') }}/source-bpmf"
+    - debug:
+        msg: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+    - command: "tar xzvf {{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }} -C {{ lookup('env','WORKSPACE') }}/source-bpmf"
+    run_once: yes
+    delegate_to: localhost
+
+- name: Uplosd Sourcemaps
+  hosts: bpmf
+  gather_facts: no
+  serial: 1
+  tasks:
+  - include_tasks: upload_sourcemaps.yml
+    vars:
+      artefacto: "{{ lookup('env','WORKSPACE') }}/artifacts/{{ artifact }}"
+      destination: "{{ remote_dir }}" 
+      apm_service_name: "{{ apm_service }}"
+      apm_srv_version: "{{ apm_service_version }}"
+      app_base_url: "{{ lookup('env','appurl') }}"
+      artifact_name: "{{ artifact_name }}"
+      apm_server_url: "{{ apm_server_src }}"
+      apm_apikey: "{{ lookup('env', 'apm_API_key') }}"
+      archive: true
+#    when: upload_sourcemaps|bool

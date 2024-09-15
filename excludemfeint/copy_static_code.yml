@@ -1,0 +1,82 @@
+---
+- set_fact:
+    timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+- name: Creando carpeta temporal
+  file:
+    state: directory
+    path: "{{ item }}"
+  loop:
+    - "/tmp/source-{{ timestamp }}"
+    - "/tmp/backup-{{ timestamp }}"
+- block:
+  - name: Chequeando carpeta de destino
+    file:
+      state: directory
+      path: "{{ destination }}"
+      mode: "1777"
+    register: resultado
+  - name: Realizando copia de seguridad de la versión actual
+    copy:
+      src: "{{ destination }}/"
+      dest: "/tmp/backup-{{ timestamp }}"
+      remote_src: yes
+    when: not resultado.changed
+  - name: Subir el archivo comprimido al servidor
+    ansible.builtin.copy:
+      src: "{{ source }}"
+      dest: "/tmp/{{ source | basename }}"
+    when: archive is defined and (archive | bool)
+  - name: Descomprimiendo nueva versión
+    block:
+      - name: Descomprimir el archivo sin exclusiones
+        shell: "gunzip -c '/tmp/{{ source | basename }}' | tar xvf - -C /tmp/source-{{ timestamp }}"
+        when: archive is defined and (archive | bool)
+      - name: Encontrar archivos a excluir
+        find:
+          paths: "/tmp/source-{{ timestamp }}"
+          patterns: "{{ item }}"
+        register: files_to_delete
+        loop: "{{ exclude | default([]) }}"
+        when: exclude is defined and exclude | length > 0
+      - name: Eliminar archivos a excluir encontrados
+        file:
+          path: "{{ item.path }}"
+          state: absent
+        with_items: "{{ files_to_delete.results | map(attribute='files') | flatten }}"
+        when: files_to_delete is defined and files_to_delete.results | length > 0
+  - name: preparando nueva versión
+    find: 
+      paths: "{{ source }}"
+    register: files_to_copy
+    delegate_to: localhost
+    when: archive is not defined or not (archive|bool)
+  - name: Subiendo nueva versión
+    copy:
+      src: "{{ item.path }}"
+      dest: "/tmp/source-{{ timestamp }}"
+    loop: "{{ files_to_copy.files }}"
+    when: archive is not defined or not (archive|bool) 
+  - name: Puesta en producción
+    copy:
+      src: "/tmp/source-{{ timestamp }}/"
+      dest: "{{ destination }}"
+      mode: "1777"
+      remote_src: yes
+  rescue:
+    - debug: 
+        msg: "ERROR: Hubo un error al desplegar - {{ ansible_failed_task.name }}"
+    - name: Recuperando desde backup
+      copy:
+        src: "/tmp/backup-{{ timestamp }}/"
+        dest: "{{ destination }}"
+        mode: "1777"
+        remote_src: yes
+    - command: /bin/false
+  always:
+    - name: Limpiando temporales
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/source-{{ timestamp }}"
+        - "/tmp/backup-{{ timestamp }}"

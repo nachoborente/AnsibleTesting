@@ -1,0 +1,10 @@
+- set_fact:
+    timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+- name: Creando carpeta temporal
+  file:
+    state: directory
+    path: "/mnt/c/temp/delete/ansibleTest/01"
+- name: Limpiando temporales
+  file:
+    path: "/mnt/c/temp/delete/ansibleTest/01"
+    state: absent    

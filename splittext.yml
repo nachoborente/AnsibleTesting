@@ -1,0 +1,11 @@
+---
+- name: Split playbook
+  hosts: localhost
+  vars:
+      mystr: "ver.mfe.12345"
+  tasks:
+    - name: Split the string
+      set_fact:
+        app_version: "{{ mystr.split('.') | last }}"
+    - debug: var=app_version
+    

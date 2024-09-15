@@ -1,0 +1,78 @@
+---
+- become: true
+  block:
+  - set_fact:
+      timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+  - name: Managing IHS folder
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0755'
+      owner: "{{ http.httpUser }}"
+      group: "{{ http.httpGroup }}"
+    loop:
+      - "/var/httpd/{{ appName }}_{{ publicHttpsPort }}"
+      - "/var/httpd/{{ appName }}_{{ publicHttpsPort }}/logs/"
+  - name: "Check that HTTP conf exists"
+    stat:
+      path: "{{ http.httpServerPath }}/conf/httpd.{{ appName }}_{{ publicHttpsPort }}.conf"
+    register: httpdResult
+  - name: Creating HTTPServer config file
+    template:
+        src: http.conf.j2
+        dest: "{{ http.httpServerPath }}/conf/httpd.{{ appName }}_{{ publicHttpsPort }}.conf"
+        backup: yes
+        owner: "root"
+        group: "system"
+        mode: 0644
+    when: not httpdResult.stat.exists
+  - name: "Check that apachectl file exists"
+    stat:
+      path: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ publicHttpsPort }}"
+    register: apachectlResult
+  - name: Creating HTTPServer apachectl file
+    template:
+        src: apachectl.j2
+        dest: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ publicHttpsPort }}"
+        backup: yes
+        owner: "root"
+        group: "system"
+        mode: '0755'
+    when: not apachectlResult.stat.exists
+  - name: starting HTTPServer
+    command: "{{ http.httpServerPath }}/bin/apachectl.{{ appName }}_{{ publicHttpsPort }} start"    
+    when: not apachectlResult.stat.exists
+  - name: "Check that StartScrip exist"
+    stat:
+      path: "/etc/start9.{{ appName }}_{{ publicHttpsPort }}"
+    register: start9scriptexist
+  - name: "Create start9 script"
+    template:
+        src: start9
+        dest: "/etc/start9.{{ appName }}_{{ publicHttpsPort }}"
+        backup: no
+        owner: "root"
+        group: "system"
+        mode: 0774
+    when: not start9scriptexist.stat.exists
+  - name: "Check that StartScript exist"
+    stat:
+      path: "/etc/start9.WBs"
+    register: start9wbsexist
+  - name: Find line in file
+    lineinfile:
+      dest: /etc/start9.WBs
+      line: "start9.{{ appName }}_{{ publicHttpsPort }}"
+    check_mode: "yes"
+    register: presence
+  - debug: var=presence
+  - name: Insert multiple lines and Backup
+    blockinfile:
+      path: /etc/start9.WBs
+      backup: yes
+      block: |
+        sleep 2
+        start9.{{ appName }}_{{ publicHttpsPort }}
+    when: presence.changed
+    
+  

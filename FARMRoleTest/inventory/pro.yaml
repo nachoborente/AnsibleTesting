@@ -1,0 +1,82 @@
+---
+appserver:
+  hosts:
+    BWEBS1:
+      ansible_host: 172.31.11.82
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.78
+      f5_member_name: bwebs1.finanwebrm
+    BWEBS2:
+      ansible_host: 172.31.11.83
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.79
+      f5_member_name: bwebs2.finanwebrm
+    BWEBS3:
+      ansible_host: 172.31.11.105
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.80
+      f5_member_name: bwebs3.finanwebrm
+    BWEBS4:
+      ansible_host: 172.31.11.171
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.84
+      f5_member_name: bwebs4.finanwebrm
+    BWEBS5:
+      ansible_host: 172.31.11.11
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.85
+      f5_member_name: bwebs5.finanwebrm
+    BWEBS6:
+      ansible_host: 172.31.11.31
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.88
+      f5_member_name: bwebs6.finanwebrm
+    BWEBS7:
+      ansible_host: 172.31.11.221
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.95
+      f5_member_name: bwebs7.finanwebrm
+    BWEBS8:
+      ansible_host: 172.31.11.241
+      #ansible_user: "{{ lookup('env','ansibleUser') }}"
+      #ansible_password: "{{ lookup('env','ansiblePassword') }}"
+      ansible_user: "spauser2"
+      ansible_ssh_private_key_file: "spauser2-pro"
+      ip_vhost: 172.31.11.96
+      f5_member_name: bwebs8.finanwebrm
+  vars:
+      remote_dir: "/home/spauser2/finanwebrmpru.xxxxtest.es/"
+      artifact: "FARM-finanweb-rm.tgz"
+      artifact_name: "FARM-finanweb-rm.tgz"
+      upload_sourcemaps: "{{ sourceMap|bool }}"
+      publicEndpoint: finanwebrmpru.xxxxtest.es
+      publicHttpsPort: 443
+      hasBalancer: true
+lb:
+  hosts:
+    lb-f5-pro:
+      ansible_host: 195.76.110.74
+  vars:
+      pool: finanwebRM_443
+      partition: finanweb-RM-PRO

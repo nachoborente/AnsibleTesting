@@ -1,0 +1,21 @@
+bpmf:
+  hosts:
+    server1: 
+      ansible_host: 172.31.14.11
+      ansible_user: spauser
+      ansible_ssh_private_key_file: spauser_int
+      excludeStatic:
+        - entrypoints.json
+        - entrypoints-mfe.json
+  vars:
+    remote_dir: /home/spauser/univiapru.xxxxxxbanco.es/
+    artifact: BPMF-banca-privada-mfe.tgz
+    artifact_name: BPMF-banca-privada-mfe.tgz
+    sourcemaps_ext: js.uni.map
+    upload_sourcemaps:  sourceMap|bool
+    src_base_url: https://staticpru.xxxxxxbanco.es
+    #https://univiapru.xxxxxxbanco.es
+    apm_server_src: https://devops.xxxxtest.es/kibana_pre/api/apm/sourcemaps
+    apm_service: univia-desa
+    apm_service_version: "1.0"
+    upload_sourcemaps: true

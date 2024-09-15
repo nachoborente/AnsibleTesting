@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: ls 
+      ansible.builtin.shell: ls -Ra
+      args:
+        chdir: "mnt/c/temp/delete"
+      register: out
+    - debug: var=out.stdout_lines
+    - name: Checking urls
+        uri:
+          #url: "https://{{ publicEndpoint }}:{{ serverPortHttps }}"
+          url: "https://finanweb.xxxxtest.es:1444"
+          return_content: yes
+          status_code: 200, 401, 403
+          validate_certs: no
+          use_proxy: no
+        retries: 10 
+        delay: 10
+        register: result_public
+        until: result_public is not failed
+        delegate_to: localhost

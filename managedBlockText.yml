@@ -1,0 +1,38 @@
+---
+- name: Set Environment
+  hosts: localhost
+  vars:
+    WORKSPACE: "/mnt/c/temp/delete/Ansible/TestDel"
+    wb9Path: "/mnt/c/temp/delete/Ansible/Test01/start9.WBs"
+    appName: "app14_443"
+  tasks:
+  - name: Delete content in folder
+    shell: rm -Rf "{{ WORKSPACE }}/*"
+    args:
+      chdir: "{{ WORKSPACE }}"
+  - name: "Check that StartScript exist"
+    stat:
+      path: "{{ wb9Path }}"
+    register: start9wbsexist
+  - name: Find line in file
+    lineinfile:
+      dest: "{{ wb9Path }}"
+      line: "start9.{{ appName }}"
+    check_mode: "yes"
+    register: addline
+  - debug: var=addline
+  
+  # - name: Insert line and Backup
+  #   lineinfile:
+  #     path: "{{ wb9Path }}"
+  #     line: "sleep 2"
+  #     insertafter: EOF
+  #     backup: yes
+  #   when: addline.changed
+  - name: Insert line and Backup
+    lineinfile:
+      path: "{{ wb9Path }}"
+      line: "start9.{{ appName }}\nsleep 2"
+      regexp: "start9.{{ appName }}"
+      insertafter: EOF
+    when: addline.changed  

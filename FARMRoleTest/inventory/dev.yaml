@@ -1,0 +1,22 @@
+---
+appserver:
+  hosts:
+
+   bpruebas1: 
+      ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+      remote_dir: "/mnt/c/temp/delete/Ansible/bpruebas02/home"
+    bpruebas2: 
+      ansible_host:  172.17.242.204
+      ansible_user: nacho
+      ansible_password: nacho
+      ip_vhost: 172.17.242.XXX
+      remote_dir: "/mnt/c/temp/delete/Ansible/bpruebas02/home"
+  vars:
+      artifact: "testArtifact.tgz"
+      artifact_name: "testArtifact.tgz"
+      upload_sourcemaps: "false"
+      publicEndpoint: finanwebrmpru.xxxxx.es
+      publicHttpsPort: 1444
+      hasBalancer: false

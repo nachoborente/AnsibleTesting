@@ -1,0 +1,39 @@
+---
+- set_fact:
+    timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+    carpeta: "/mnt/c/temp/delete/TestCopy/bk"
+- block:
+    - name: Copy files using find with exec
+      find:
+        paths: "{{ source }}"
+        file_type: file
+        recurse: yes
+      register: file_list
+    - name: Copy files using find with exec
+      find:
+        paths: "{{ source }}"
+        file_type: directory
+        recurse: yes
+      register: folder_list
+    - set_fact:
+        folders_to_copy: "{{ folder_list.files | reject('search', 'mfe-integration') | list }}"
+        files_to_copy: "{{ file_list.files | reject('search', 'mfe-integration') | list }}"
+    - debug: var=folders_to_copy
+    - debug: var=files_to_copy
+    - name: Create folders to copy
+      file:
+        path: "{{ carpeta }}{{ item.path | replace(source, '') }}"
+        state: directory
+      loop: "{{ folders_to_copy }}"
+    - name: Copy files to destination
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ carpeta }}{{ item.path | replace(source, '') }}"
+      loop: "{{ files_to_copy }}"
+  # - name: Crear carpetas- excluyendo mfe_integration
+  #   ansible.builtin.shell: ls -a
+  #   #ansible.builtin.shell: ls -Ra
+  #   args:
+  #     chdir: "{{ destination }}"
+  #   register: out
+  #   - debug: var=out.stdout_lines
